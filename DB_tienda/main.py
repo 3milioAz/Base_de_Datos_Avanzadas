@@ -8,13 +8,14 @@ from modelos.venta import Venta
 from modelos.entrada_mercancia import EntradaMercancia
 from modelos.bitacora import Bitacora
 
+
 # ------------------- Abrir la base de datos -------------------
 base = BaseDatos()
 raiz = base.raiz
 
 
-# -------------- Inicializacion de colecciones y datos iniciales --------------
-def cargar_datos(): # Aqui creamos las colecciones que pertenecen a cada una de las clases
+# -------------- Inicialización de colecciones y datos iniciales --------------
+def cargar_datos():
 
     raiz.categorias = {}
     raiz.productos = {}
@@ -24,8 +25,7 @@ def cargar_datos(): # Aqui creamos las colecciones que pertenecen a cada una de 
     raiz.entradas = {}
     raiz.bitacora = Bitacora()
 
-
-     # Categorías
+    # Categorías
     abarrotes = Categoria("C01", "Abarrotes")
     bebidas = Categoria("C02", "Bebidas")
     limpieza = Categoria("C03", "Limpieza")
@@ -62,8 +62,19 @@ def cargar_datos(): # Aqui creamos las colecciones que pertenecen a cada una de 
     electronica.agregarProducto(producto5)
 
     # Proveedores
-    proveedor1 = Proveedor("PR01", "Distribuidora MX", "2281111111", "ventas@distribuidoramx.com")
-    proveedor2 = Proveedor("PR02", "Comercializadora del Centro", "2282222222", "contacto@comercializadoracentro.com")
+    proveedor1 = Proveedor(
+        "PR01",
+        "Distribuidora MX",
+        "2281111111",
+        "ventas@distribuidoramx.com"
+    )
+
+    proveedor2 = Proveedor(
+        "PR02",
+        "Comercializadora del Centro",
+        "2282222222",
+        "contacto@comercializadoracentro.com"
+    )
 
     raiz.proveedores["PR01"] = proveedor1
     raiz.proveedores["PR02"] = proveedor2
@@ -78,70 +89,206 @@ def cargar_datos(): # Aqui creamos las colecciones que pertenecen a cada una de 
     proveedor2.agregarProducto(producto6)
 
     # Clientes
-    cliente1 = Cliente("CL01", "Juan Pérez", "2283333333", "juan@gmail.com")
-    cliente2 = Cliente("CL02", "María López", "2284444444", "maria@gmail.com")
-    cliente3 = Cliente("CL03", "Carlos Hernández", "2285555555", "carlos@gmail.com")
+    cliente1 = Cliente(
+        "CL01",
+        "Juan Pérez",
+        "2283333333",
+        "juan@gmail.com"
+    )
+
+    cliente2 = Cliente(
+        "CL02",
+        "María López",
+        "2284444444",
+        "maria@gmail.com"
+    )
+
+    cliente3 = Cliente(
+        "CL03",
+        "Carlos Hernández",
+        "2285555555",
+        "carlos@gmail.com"
+    )
 
     raiz.clientes["CL01"] = cliente1
     raiz.clientes["CL02"] = cliente2
     raiz.clientes["CL03"] = cliente3
 
 
-if not hasattr(raiz, "datos_cargados"): # Eso pregunta a la raiz primero si no existe algo en la raiz llamado categorías entonces la crea, esto para que si en algun momento volvamos a ejecutarla no se haga una nueva y borre la anterior, sino no haga nada
+if not hasattr(raiz, "datos_cargados"):
+
     cargar_datos()
+
     raiz.datos_cargados = True
+
     base.guardar()
 
 
-# ------------------- Cerrar la base de datos -------------------
+# ------------------- Cerrar y volver a abrir -------------------
+
 base.cerrar()
 
-
-# ------------------- Volver a abrir la base de datos -------------------
+# ---------------- Pruebas de funcionalidad ----------------------
 base = BaseDatos()
 raiz = base.raiz
 
-# ------------------- Operaciones de negocio -------------------
+print("\n==========================================")
+print("----------- TIENDA LA ECONÓMICA ----------")
+print("-------- PRUEBAS DE FUNCIONAMIENTO -------")
+print("==========================================")
 
-# Registrar una venta
-venta = Venta("V001", raiz.clientes["CL01"])
-
-venta.agregarProducto(raiz.productos["P001"], 2)
-venta.agregarProducto(raiz.productos["P002"], 3)
-
-venta.registrarVenta()
-raiz.ventas["V001"] = venta
-raiz.clientes["CL01"].registrarCompra(venta)
-raiz.bitacora.registrarOperacion(venta)
+print("\nBase de datos reabierta correctamente.")
+print("Los datos iniciales permanecen almacenados.")
 
 
-# Registrar entrada de mercancía
-entrada = EntradaMercancia("E001", raiz.proveedores["PR01"])
+# ------------------- Prueba 1: Crear producto -------------------
 
-entrada.agregarProducto(raiz.productos["P001"], 10)
-entrada.registrarEntrada()
+print("\n--- PRUEBA 1: CREAR PRODUCTO ---")
 
-raiz.entradas["E001"] = entrada
-raiz.bitacora.registrarOperacion(entrada)
+producto_prueba = Producto(
+    "P007",
+    "Pan",
+    "Pan de caja",
+    45.00,
+    20,
+    raiz.categorias["C01"]
+)
 
+raiz.productos["P007"] = producto_prueba
 
 base.guardar()
 
-print("\nOperaciones realizadas correctamente.")
-print("Total de la venta V001:", venta.total)
+print("Producto creado correctamente.")
+print("Código:", producto_prueba.codigoProducto)
+print("Nombre:", producto_prueba.nombre)
+print("Precio:", producto_prueba.precio)
+print("Existencias:", producto_prueba.existencias)
 
 
-# ------------------- Consultas -------------------
+# ------------------- Prueba 2: Consultar producto -------------------
+
+print("\n--- PRUEBA 2: CONSULTAR PRODUCTO ---")
+
+producto = raiz.productos.get("P007")
+
+if producto:
+    print("Producto recuperado correctamente.")
+    print("Código:", producto.codigoProducto)
+    print("Nombre:", producto.nombre)
+    print("Precio:", producto.precio)
+    print("Existencias:", producto.existencias)
+else:
+    print("Producto no encontrado.")
+
+
+# ------------------- Prueba 3: Modificar producto -------------------
+
+print("\n--- PRUEBA 3: MODIFICAR PRODUCTO ---")
+
+precio_anterior = producto.precio
+
+producto.actualizarPrecio(50.00)
+
+base.guardar()
+
+print("Producto modificado correctamente.")
+print("Precio anterior:", precio_anterior)
+print("Nuevo precio:", producto.precio)
+
+
+# ------------------- Prueba 4: Eliminar producto -------------------
+
+print("\n--- PRUEBA 4: ELIMINAR PRODUCTO ---")
+
+del raiz.productos["P007"]
+
+base.guardar()
+
+if "P007" not in raiz.productos:
+    print("Producto eliminado correctamente.")
+else:
+    print("El producto todavía existe.")
+
+
+# ------------------- Prueba 5 y 6: Registrar venta e inventario -------------------
+
+print("\n--- PRUEBA 5: REGISTRAR VENTA ---")
+
+producto_arroz = raiz.productos["P001"]
+existencias_antes = producto_arroz.existencias
+
+venta = Venta("V002", raiz.clientes["CL01"])
+
+venta.agregarProducto(producto_arroz, 2)
+venta.agregarProducto(raiz.productos["P002"], 3)
+
+venta.registrarVenta()
+
+raiz.ventas["V002"] = venta
+raiz.clientes["CL01"].registrarCompra(venta)
+raiz.bitacora.registrarOperacion(venta)
+
+base.guardar()
+
+print("Venta registrada correctamente.")
+print("ID de venta:", venta.idVenta)
+print("Cliente:", venta.cliente.nombre)
+print("Total:", venta.total)
+
+
+print("\n--- PRUEBA 6: ACTUALIZAR INVENTARIO ---")
+
+existencias_despues = producto_arroz.existencias
+
+print("Producto:", producto_arroz.nombre)
+print("Existencias antes:", existencias_antes)
+print("Existencias después:", existencias_despues)
+
+if existencias_despues < existencias_antes:
+    print("Inventario actualizado correctamente.")
+
+
+# ------------------- Prueba 7: Venta total diaria -------------------
+
+print("\n--- PRUEBA 7: REPORTE DE VENTA TOTAL DIARIA ---")
+
+hoy = venta.fecha.date()
+
+total_diario = 0
+
+for venta_registrada in raiz.ventas.values():
+
+    if venta_registrada.fecha.date() == hoy:
+        total_diario += venta_registrada.total
+
+print("Fecha:", hoy)
+print("Total de ventas del día:", total_diario)
+
+
+# ------------------- Consultas del sistema -------------------
+
+print("\n==========================================")
+print("--------- CONSULTAS DEL SISTEMA ----------")
+print("==========================================")
+
 
 print("\n--- 1. Todos los productos ---")
 
 for producto in raiz.productos.values():
-    print(producto.codigoProducto, "-", producto.nombre, "-", producto.precio)
+
+    print(
+        producto.codigoProducto,
+        "-",
+        producto.nombre,
+        "- $",
+        producto.precio
+    )
 
 
 print("\n--- 2. Productos con precio mayor a $20 ---")
 
 for producto in raiz.productos.values():
+
     if producto.precio > 20:
         print(producto.nombre, "-", producto.precio)
 
@@ -149,6 +296,7 @@ for producto in raiz.productos.values():
 print("\n--- 3. Productos disponibles ---")
 
 for producto in raiz.productos.values():
+
     if producto.verificarDisponibilidad():
         print(producto.nombre, "-", producto.existencias)
 
@@ -156,6 +304,7 @@ for producto in raiz.productos.values():
 print("\n--- 4. Productos del proveedor PR01 ---")
 
 for producto in raiz.proveedores["PR01"].consultarProductos():
+
     print(producto.nombre)
 
 
@@ -168,5 +317,37 @@ total_ventas = sum(
 print("Total de ventas:", total_ventas)
 
 
-# ------------------- Cerrar la base de datos -------------------
+# ------------------- Prueba 8: Cerrar y abrir el sistema -------------------
+
+print("\n--- PRUEBA 8: CERRAR Y ABRIR EL SISTEMA ---")
+
+base.cerrar()
+
+print("Base de datos cerrada correctamente.")
+
+base = BaseDatos()
+raiz = base.raiz
+
+print("Base de datos reabierta correctamente.")
+
+
+if "V002" in raiz.ventas:
+
+    print("Venta V002 recuperada correctamente.")
+    print("Total de la venta:", raiz.ventas["V002"].total)
+
+
+if "P001" in raiz.productos:
+
+    print("Producto P001 recuperado correctamente.")
+    print(
+        "Existencias actuales:",
+        raiz.productos["P001"].existencias
+    )
+
+
+print("\n==========================================")
+print("---------- PRUEBAS FINALIZADAS -----------")
+print("==========================================")
+
 base.cerrar()

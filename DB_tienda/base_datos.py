@@ -1,3 +1,4 @@
+import os
 import ZODB
 import ZODB.FileStorage
 import transaction
@@ -6,7 +7,12 @@ import transaction
 class BaseDatos:
 
     def __init__(self):
-        self.storage = ZODB.FileStorage.FileStorage("datos/tienda.fs")
+        carpeta = os.path.join(os.path.dirname(__file__), "datos")
+        os.makedirs(carpeta, exist_ok=True)
+
+        archivo = os.path.join(carpeta, "tienda.fs")
+
+        self.storage = ZODB.FileStorage.FileStorage(archivo)
         self.db = ZODB.DB(self.storage)
         self.conexion = self.db.open()
         self.raiz = self.conexion.root()
