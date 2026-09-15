@@ -1,23 +1,25 @@
-from persistent import Persistent
 from datetime import datetime
 
-class Venta(Persistent):
+from persistent import Persistent
 
-    def __init__(self, idVenta, cliente):
-        self.idVenta = idVenta
+
+class Venta(Persistent):
+    """Representa una venta realizada en la tienda."""
+
+    def __init__(self, id_venta, cliente):
+        self.id_venta = id_venta
         self.fecha = datetime.now()
         self.cliente = cliente
         self.productos = []
         self.total = 0
 
-    def agregarProducto(self, producto, cantidad):
+    def agregar_producto(self, producto, cantidad):
+        """Agrega un producto a la venta."""
         if cantidad <= 0:
-            print("La cantidad debe ser mayor a cero.")
-            return
+            raise ValueError("La cantidad debe ser mayor que cero.")
 
         if cantidad > producto.existencias:
-            print("No hay existencias suficientes.")
-            return
+            raise ValueError("No hay existencias suficientes.")
 
         self.productos.append({
             "producto": producto,
@@ -25,18 +27,24 @@ class Venta(Persistent):
             "precio": producto.precio
         })
 
-    def calcularTotal(self):
+    def calcular_total(self):
+        """Calcula y devuelve el total de la venta."""
         self.total = sum(
             item["cantidad"] * item["precio"]
             for item in self.productos
         )
+
         return self.total
 
-    def consultarProductos(self):
+    def consultar_productos(self):
+        """Devuelve los productos incluidos en la venta."""
         return self.productos
 
-    def registrarVenta(self):
+    def registrar_venta(self):
+        """Actualiza el inventario y calcula el total de la venta."""
         for item in self.productos:
-            item["producto"].disminuirExistencias(item["cantidad"])
+            item["producto"].disminuir_existencias(
+                item["cantidad"]
+            )
 
-        self.calcularTotal()
+        self.calcular_total()
